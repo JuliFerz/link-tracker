@@ -27,6 +27,9 @@ export class LinkService {
         dto.url,
         hashId,
         true,
+        0,
+        new Date(),
+        dto.password
       );
 
       const saved: Link = await this.linkRepository.create(link);
@@ -44,10 +47,10 @@ export class LinkService {
     }
   }
 
-  async getLink(hashId: string): Promise<string> {
+  async redirectLink(hashId: string, password?: string): Promise<string> {
     const link = await this.linkRepository.findByHashId(hashId)
 
-    this.checkLink(link);
+    this.checkLink(link, password);
     // ! WIP consultar si expiró
 
     link.incrementVisit();
@@ -56,10 +59,10 @@ export class LinkService {
     return link.targetUrl;
   }
 
-  async getStats(hashId: string): Promise<{ visits: number }> {
+  async getStats(hashId: string, password?: string): Promise<{ visits: number }> {
     const link = await this.linkRepository.findByHashId(hashId)
 
-    this.checkLink(link);
+    this.checkLink(link, password);
 
     // ! WIP consultar si expiró
 
@@ -68,10 +71,10 @@ export class LinkService {
     };
   }
 
-  async invalidateLink(hashId: string): Promise<{ message: string }> {
+  async invalidateLink(hashId: string, password?: string): Promise<{ message: string }> {
     const link = await this.linkRepository.findByHashId(hashId)
 
-    this.checkLink(link);
+    this.checkLink(link, password);
     // ! WIP consultar si expiró
 
     link.invalidate();
@@ -80,9 +83,13 @@ export class LinkService {
     return { message: `Link '${link.hashId}' invalidated successfully` };
   }
 
-  checkLink(link: Link | null): asserts link is Link {
+  checkLink(link: Link | null, password: string = ""): asserts link is Link {
     if (!link || !link.isValid) {
       throw new NotFoundException('Link not found');
+    }
+    if (link.password) {
+      if (!password) throw new BadRequestException(`Password is required for ${link.hashId}`);
+      if (!link.checkPassword(password)) throw new BadRequestException(`Incorrect password for ${link.hashId}`);
     }
   }
 
