@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateLinkDto } from '../dto/create-link.dto';
 import { Link } from '../../domain/link.entity';
@@ -42,6 +42,27 @@ export class LinkService {
     catch (error) {
       throw error;
     }
+  }
+
+  async getLink(hashId: string): Promise<string> {
+    if (!hashId) {
+      throw new BadRequestException('HashId is required');
+    }
+
+    const link = await this.linkRepository.findByHashId(hashId)
+
+    if (!link) {
+      throw new NotFoundException('HashId not found');
+    }
+    if (!link.isValid) {
+      throw new BadRequestException('Link is invalid');
+    }
+    // ! WIP consultar si expiró
+
+    link.incrementVisit();
+    await this.linkRepository.update(link);
+
+    return link.targetUrl;
   }
 
   validateUrl(url: string): boolean {

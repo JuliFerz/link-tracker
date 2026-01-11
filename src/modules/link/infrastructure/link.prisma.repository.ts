@@ -33,15 +33,33 @@ export class LinkPrismaRepository implements LinkRepository {
     );
   }
 
-  update(link: Link): Promise<void> {
-    throw new Error("Method not implemented.");
+  async update(link: Link): Promise<void> {
+    await this.prisma.link.update({
+      where: { id: link.id! },
+      data: {
+        visits: link.visits,
+      }
+    });
   }
 
-  findByShortId(shortId: string): Promise<Link | null> {
-    throw new Error("Method not implemented.");
+  async findByHashId(hashId: string): Promise<Link | null> {
+    const r = await this.prisma.link.findUnique({
+      where: { hashId: hashId }
+    });
+
+    return r ? new Link(
+      r.id,
+      r.targetUrl,
+      r.hashId,
+      r.isValid,
+      r.visits,
+      r.createdAt,
+      r.password ?? undefined,
+      r.expiresAt ?? undefined,
+    ) : null;
   }
 
-  existsByShortId(shortId: string): Promise<boolean> {
+  existsByHashId(hashId: string): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
 

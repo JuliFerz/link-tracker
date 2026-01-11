@@ -8,7 +8,10 @@ import { PrismaService } from 'src/common/database/prisma.service';
 import { RedirectController } from './infrastructure/controllers/redirect.controller';
 
 @Module({
-  controllers: [LinkController, RedirectController],
+  controllers: [
+    LinkController,
+    RedirectController
+  ],
   providers: [
     LinkService,
     PrismaService,
