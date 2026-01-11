@@ -51,18 +51,40 @@ export class LinkService {
 
     const link = await this.linkRepository.findByHashId(hashId)
 
-    if (!link) {
-      throw new NotFoundException('HashId not found');
-    }
-    if (!link.isValid) {
-      throw new BadRequestException('Link is invalid');
-    }
+    this.checkLink(link);
     // ! WIP consultar si expiró
 
     link.incrementVisit();
     await this.linkRepository.update(link);
 
     return link.targetUrl;
+  }
+
+  async getStats(hashId: string): Promise<{ visits: number }> {
+    try {
+      if (!hashId) {
+        throw new BadRequestException('HashId is required');
+      }
+
+      const link = await this.linkRepository.findByHashId(hashId)
+
+      this.checkLink(link);
+
+      // ! WIP consultar si expiró
+
+      return {
+        visits: link!.visits,
+      };
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+
+  checkLink(link: Link | null): asserts link is Link {
+    if (!link || !link.isValid) {
+      throw new NotFoundException('Link not found');
+    }
   }
 
   validateUrl(url: string): boolean {
