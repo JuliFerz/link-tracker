@@ -52,7 +52,6 @@ export class LinkService {
     const link = await this.linkRepository.findByHashId(hashId)
 
     this.checkLink(link, password);
-    // ! WIP consultar si expiró
 
     link.incrementVisit();
     await this.linkRepository.update(link);
@@ -65,8 +64,6 @@ export class LinkService {
 
     this.checkLink(link, password);
 
-    // ! WIP consultar si expiró
-
     return {
       visits: link!.visits,
     };
@@ -76,7 +73,6 @@ export class LinkService {
     const link = await this.linkRepository.findByHashId(hashId)
 
     this.checkLink(link, password);
-    // ! WIP consultar si expiró
 
     link.invalidate();
     await this.linkRepository.update(link);
