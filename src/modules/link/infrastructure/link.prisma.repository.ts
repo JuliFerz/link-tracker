@@ -38,6 +38,7 @@ export class LinkPrismaRepository implements LinkRepository {
       where: { id: link.id! },
       data: {
         visits: link.visits,
+        isValid: link.isValid
       }
     });
   }

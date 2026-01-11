@@ -45,10 +45,6 @@ export class LinkService {
   }
 
   async getLink(hashId: string): Promise<string> {
-    if (!hashId) {
-      throw new BadRequestException('HashId is required');
-    }
-
     const link = await this.linkRepository.findByHashId(hashId)
 
     this.checkLink(link);
@@ -61,24 +57,27 @@ export class LinkService {
   }
 
   async getStats(hashId: string): Promise<{ visits: number }> {
-    try {
-      if (!hashId) {
-        throw new BadRequestException('HashId is required');
-      }
+    const link = await this.linkRepository.findByHashId(hashId)
 
-      const link = await this.linkRepository.findByHashId(hashId)
+    this.checkLink(link);
 
-      this.checkLink(link);
+    // ! WIP consultar si expiró
 
-      // ! WIP consultar si expiró
+    return {
+      visits: link!.visits,
+    };
+  }
 
-      return {
-        visits: link!.visits,
-      };
-    }
-    catch (error) {
-      throw error;
-    }
+  async invalidateLink(hashId: string): Promise<{ message: string }> {
+    const link = await this.linkRepository.findByHashId(hashId)
+
+    this.checkLink(link);
+    // ! WIP consultar si expiró
+
+    link.invalidate();
+    await this.linkRepository.update(link);
+
+    return { message: `Link '${link.hashId}' invalidated successfully` };
   }
 
   checkLink(link: Link | null): asserts link is Link {

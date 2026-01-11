@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 
 import { CreateLinkDto } from '../../application/dto/create-link.dto';
 import { LinkService } from '../../application/services/link.service';
@@ -16,5 +16,10 @@ export class LinkController {
   @Get('l/:hashId/stats')
   async getStats(@Param('hashId') hashId: string) {
     return await this.linkService.getStats(hashId);
+  }
+
+  @Put('l/:hashId')
+  async invalidateLink(@Param('hashId') hashId: string) {
+    return await this.linkService.invalidateLink(hashId);
   }
 }
