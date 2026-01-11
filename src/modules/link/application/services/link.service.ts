@@ -29,7 +29,8 @@ export class LinkService {
         true,
         0,
         new Date(),
-        dto.password
+        dto.password,
+        dto.expiresAt ? new Date(dto.expiresAt) : undefined
       );
 
       const saved: Link = await this.linkRepository.create(link);
@@ -86,6 +87,9 @@ export class LinkService {
   checkLink(link: Link | null, password: string = ""): asserts link is Link {
     if (!link || !link.isValid) {
       throw new NotFoundException('Link not found');
+    }
+    if (link.expiresAt) {
+      if (link.checkIsExpired(new Date())) throw new NotFoundException('Link not found');
     }
     if (link.password) {
       if (!password) throw new BadRequestException(`Password is required for ${link.hashId}`);
